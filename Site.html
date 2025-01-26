@@ -1,0 +1,137 @@
+<!-- Menü mit Beiträgen -->
+<div class="custom-menu-container" id="sticky-menu">
+    <ul id="post-menu" class="horizontal-menu">
+        <!-- Menü wird hier dynamisch generiert -->
+    </ul>
+</div>
+
+<!-- Bereich, in dem der ausgewählte Beitrag angezeigt wird -->
+<div id="post-content" class="post-display">
+    <p>Wähle einen Beitrag aus dem Menü, um den Inhalt anzuzeigen.</p>
+</div>
+
+<style>
+    /* CSS für das horizontale Menü */
+    .horizontal-menu {
+        display: flex;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+background-color: rgba(255, 255, 255, 0); /* vollständig transparent */
+    }
+    .horizontal-menu li {
+        margin-right: 20px;
+    }
+    .horizontal-menu a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+    }
+    .horizontal-menu a:hover {
+        color: #0073aa;
+    }
+    .post-display {
+        margin-top: 20px;
+        padding: 10px;
+        /* border: 1px solid #ddd; Entfernen des Rahmens */
+    }
+    /* Sticky Menü-Stil */
+    #sticky-menu {
+        position: relative; /* Standardposition */
+        background-color: white; /* Hintergrundfarbe */
+        z-index: 1; /* Stellen Sie sicher, dass es über anderen Inhalten angezeigt wird */
+        transition: top 0.3s; /* Sanfte Animation beim Verschwinden */
+    }
+    .sticky {
+        position: fixed; /* Fixiert das Menü */
+        top: 0; /* Oben am Bildschirm */
+        left: 0;
+        right: 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optionaler Schatten */
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Manuelle Eingabe der Beitrags-URLs und Titel
+        const posts = [
+{ url: 'https://mariyam-alibay.art/ru/2024/11/04/%d0%bd%d0%b0%d1%83%d1%80%d1%8b%d0%b7/', title: 'Наурыз' },
+{ url: 'https://mariyam-alibay.art/ru/2024/11/04/%d1%81%d0%b0%d0%ba%d1%80%d0%b0%d0%bb%d1%8c%d0%bd%d0%be%d0%b5/', title: 'Сакральное' },
+{ url: 'https://mariyam-alibay.art/ru/gallery/325', title: 'Погребения' },
+{ url: 'https://mariyam-alibay.art/ru/gallery/330', title: 'Обычаи' },
+{ url: 'https://mariyam-alibay.art/ru/gallery/368', title: 'Керамика' },
+{ url: 'https://mariyam-alibay.art/ru/gallery/334', title: 'Пейзажи' },
+{ url: 'https://mariyam-alibay.art/ru/gallery/339', title: 'Утренний чай' },
+
+
+        ];
+
+        // Funktion zum Erstellen des Menüs
+        function createMenu() {
+            const menu = document.getElementById('post-menu');
+            posts.forEach(post => {
+                const listItem = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = post.title;
+                link.setAttribute('data-post-url', post.url);
+
+                // Event Listener für den Klick auf den Beitrag
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    loadPostContent(post.url);
+                });
+
+                listItem.appendChild(link);
+                menu.appendChild(listItem);
+            });
+            // Lade den Inhalt des ersten Beitrags automatisch
+            if (posts.length > 0) {
+                loadPostContent(posts[0].url);
+            }
+        }
+
+        // Funktion zum Laden des Inhalts eines bestimmten Beitrags
+        function loadPostContent(postUrl) {
+            document.getElementById('post-content').innerHTML = "<p>Загрузка поста...</p>";
+
+            fetch(postUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error("Netzwerkfehler");
+                    return response.text();
+                })
+                .then(html => {
+                    // Extrahiere den gewünschten Inhalt aus dem geladenen HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Suche nach dem Hauptinhalt des Beitrags
+                    const postContent = doc.querySelector('.entry-content');
+                    if (postContent) {
+                        document.getElementById('post-content').innerHTML = postContent.innerHTML;
+                    } else {
+                        document.getElementById('post-content').innerHTML = "<p>Error</p>";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error", error);
+                    document.getElementById('post-content').innerHTML = "<p>Error</p>";
+                });
+        }
+
+        // Sticky Menü
+        const stickyMenu = document.getElementById('sticky-menu');
+        const stickyOffset = stickyMenu.offsetTop;
+
+        window.onscroll = function() {
+            if (window.pageYOffset > stickyOffset) {
+                stickyMenu.classList.add("sticky");
+            } else {
+                stickyMenu.classList.remove("sticky");
+            }
+        };
+
+        // Menü erstellen
+        createMenu();
+    });
+</script>
